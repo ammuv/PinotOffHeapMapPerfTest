@@ -1,6 +1,6 @@
 package org.example;
 
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -86,10 +86,10 @@ public class BenchmarkMapDB{
     //System.out.println("insertIntSortedNoCollision: " + set.size());
   }
 
-  /*
-    Workload: Int Sorted with collision
-    Number of entries : based on _gb of storage
-    Collision: COLLISION_FACTOR many collision per key
+  /**
+   * Workload: Int Sorted with collision
+   * Number of entries : based on _gb of storage
+   * Collision: COLLISION_FACTOR many collision per key
    */
   @Benchmark
   public void insertIntSortedCollision(){
@@ -201,12 +201,18 @@ public class BenchmarkMapDB{
   // ITERATOR WORKLOADS //
   @Benchmark
   public void iterateInt(){
-    _intSet.iterator();
+    Iterator<Integer> it = _intSet.iterator();
+    while(it.hasNext()){
+      it.next();
+    }
   }
 
   @Benchmark
   public void iterateString(){
-    _stringSet.iterator();
+    Iterator<String> it = _stringSet.iterator();
+    while(it.hasNext()){
+      it.next();
+    }
   }
 
   //  CONTAINS WORKLOADS //

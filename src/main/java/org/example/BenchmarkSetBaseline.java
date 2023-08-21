@@ -1,6 +1,7 @@
 package org.example;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -32,7 +33,7 @@ public class BenchmarkSetBaseline {
   private static final int NUM_KEYS_PRELOAD = 1000000;
   private static final int GB_TO_BYTES = 1024*1024*1024; // conversion constant
   private static final int COLLISION_FACTOR = 100;  //about COLLISION_FACTOR many collisions per key for collision workloads
-  @Param({"0.005","0.05"}) //GB of data to store
+  @Param({"0.005"}) //GB of data to store
   float _gb;
 
   private RandomUtils _random;
@@ -155,12 +156,18 @@ public class BenchmarkSetBaseline {
   // ITERATOR WORKLOADS //
   @Benchmark
   public void iterateInt(){
-    _intSet.iterator();
+    Iterator<Integer> it = _intSet.iterator();
+    while(it.hasNext()){
+      it.next();
+    }
   }
 
   @Benchmark
   public void iterateString(){
-    _stringSet.iterator();
+    Iterator<String> it = _stringSet.iterator();
+    while(it.hasNext()){
+      it.next();
+    }
   }
 
   //  CONTAINS WORKLOADS //

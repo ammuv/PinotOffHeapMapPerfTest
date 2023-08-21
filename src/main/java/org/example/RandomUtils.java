@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import org.apache.commons.lang3.RandomStringUtils;
 import java.util.Random;
 import java.util.Set;
@@ -29,6 +31,21 @@ public class RandomUtils {
   public void buildStringSetRandomRange(Set<String> set, long numEntries, int maxLength){
     for(int i=0;i<numEntries;++i){
       set.add(generateRandomString(1,maxLength));
+    }
+  }
+
+  public void buildStringSetRandomRangeExact(Set<String> set, long numEntries, int maxLength){
+    while(set.size()<numEntries) {
+      set.add(generateRandomString(maxLength, maxLength));
+    }
+  }
+
+  public void CopyFromSet(Set<String> fromSet, Set<String> toSet, long numEntries){ //assumes fromSet has numEntries
+    Iterator<String> it = fromSet.iterator();
+    int i=0;
+    while(i<numEntries){
+      i++;
+      toSet.add(it.next());
     }
   }
 

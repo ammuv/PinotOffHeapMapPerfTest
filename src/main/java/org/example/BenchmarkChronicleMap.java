@@ -1,9 +1,8 @@
 package org.example;
 
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import net.openhft.chronicle.set.ChronicleSet;
 import net.openhft.chronicle.set.ChronicleSetBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -38,7 +37,8 @@ public class BenchmarkChronicleMap{
   @Param({"0.05"}) //GB of data to store
   float _gb;
 
-  @Param({"5","20","60","150"}) // key length for variable length workloads
+  @Param({"5"})
+  //@Param({"5","20","60","150"}) // key length for variable length workloads
   int _keyLength;
   private RandomUtils _random;
   private Set<Integer> _intSet;
@@ -60,10 +60,13 @@ public class BenchmarkChronicleMap{
     _random.buildStringSetRandomRange(_stringSet,NUM_KEYS_PRELOAD,100);
   }
 
-  /*
+
+
+/*
     Workload: Int Sorted with no collision
     Number of entries : based on _gb of storage
    */
+
   @Benchmark
   public void insertIntSortedNoCollision(){
     int numEntries = (int)(GB_TO_BYTES*_gb)/4;
@@ -74,11 +77,12 @@ public class BenchmarkChronicleMap{
       set.add(value);
   }
 
-  /*
+/*
     Workload: Int Sorted with collision
     Number of entries : based on _gb of storage
     Collision: COLLISION_FACTOR many collision per key
    */
+
   @Benchmark
   public void insertIntSortedCollision(){
     int numEntries = (int)(GB_TO_BYTES*_gb)/4;
@@ -94,11 +98,13 @@ public class BenchmarkChronicleMap{
     }
   }
 
-  /*
+
+/*
     Workload: Int Random with collision
     Number of entries : based on _gb of storage
     Collision: COLLISION_FACTOR many collision per key
    */
+
   @Benchmark
   public void insertIntRandomCollision(){
     int numEntries = (int)(GB_TO_BYTES*_gb)/4;
@@ -107,11 +113,13 @@ public class BenchmarkChronicleMap{
     _random.buildIntSetRandomRange(set,numEntries,maxValue);
   }
 
-  /*
+
+/*
    Workload: Random String with minimum collision
    Number of entries : based on _gb of storage
    Collision: maxLength set to 150 so 1/2^25 probability of collision
   */
+
   @Benchmark
   public void insertStringRandomLowCollision(){
     String str = StringUtils.repeat("a", _keyLength);
@@ -123,11 +131,13 @@ public class BenchmarkChronicleMap{
     _random.buildStringSetRandomRange(set,numEntries,maxLength);
   }
 
-  /*
+
+/*
    Workload: Random String with minimum collision
    Number of entries : based on _gb of storage
    Collision: maxLength set to 20 for about 1:10 collision
   */
+
   @Benchmark
   public void insertStringRandomCollision(){
     String str = StringUtils.repeat("a", _keyLength);
@@ -139,11 +149,13 @@ public class BenchmarkChronicleMap{
     _random.buildStringSetRandomRange(set,numEntries,maxLength);
   }
 
-  /*
+
+/*
   Workload: Random Byte Array with minimum collision
   Number of entries : based on _gb of storage
   Collision: maxLength set to 20 for about 1:10 collision
   */
+
   @Benchmark
   public void insertByteArrayRandomLowCollision(){
     int maxLength = 120;
@@ -154,11 +166,13 @@ public class BenchmarkChronicleMap{
     _random.buildByteArraySetRandomRange(set,numEntries,maxLength);
   }
 
-  /*
+
+/*
   Workload: Random Byte Array with collision
   Number of entries : based on _gb of storage
   Collision: maxLength set to 10 for about 1:10 collision
   */
+
   @Benchmark
   public void insertByteArrayRandomCollision(){
     int maxLength = 10;
@@ -168,15 +182,22 @@ public class BenchmarkChronicleMap{
     _random.buildByteArraySetRandomRange(set,numEntries,maxLength);
   }
 
+
   // ITERATOR WORKLOADS //
   @Benchmark
   public void iterateInt(){
-    _intSet.iterator();
+    Iterator<Integer> it = _intSet.iterator();
+    while(it.hasNext()){
+      it.next();
+    }
   }
 
   @Benchmark
   public void iterateString(){
-    _stringSet.iterator();
+    Iterator<String> it = _stringSet.iterator();
+    while(it.hasNext()){
+      it.next();
+    }
   }
 
   //  CONTAINS WORKLOADS //
@@ -199,6 +220,7 @@ public class BenchmarkChronicleMap{
   public void containsStringOutsideRange(){
     _stringSet.contains(_random.generateRandomString(101,150));
   }
+
 
   public static void main(String[] args)
       throws Exception {
