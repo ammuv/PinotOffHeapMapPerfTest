@@ -86,7 +86,7 @@ public class BenchmarkChronicleMap{
   @Benchmark
   public void insertIntSortedCollision(){
     int numEntries = (int)(GB_TO_BYTES*_gb)/4;
-    Set<Integer> set = ChronicleSetBuilder.of(Integer.class).entries(numEntries).create();
+    Set<Integer> set = ChronicleSetBuilder.of(Integer.class).entries(numEntries/COLLISION_FACTOR).create();
     int maxValue = (int) numEntries/COLLISION_FACTOR;
     int value,count=0;
 
@@ -108,7 +108,7 @@ public class BenchmarkChronicleMap{
   @Benchmark
   public void insertIntRandomCollision(){
     int numEntries = (int)(GB_TO_BYTES*_gb)/4;
-    Set<Integer> set = ChronicleSetBuilder.of(Integer.class).entries(numEntries).create();
+    Set<Integer> set = ChronicleSetBuilder.of(Integer.class).entries(numEntries/COLLISION_FACTOR).create();
     int maxValue = numEntries/COLLISION_FACTOR;
     _random.buildIntSetRandomRange(set,numEntries,maxValue);
   }

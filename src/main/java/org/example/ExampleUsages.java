@@ -176,6 +176,10 @@ public class ExampleUsages {
       System.out.println("byte works");
     }
 
+    if(byteSet.keyClass().equals(byte[].class)){
+      System.out.println("byte works");
+    }
+
   }
 
   void testChronicleIterate(){
@@ -210,10 +214,10 @@ public class ExampleUsages {
     //testChronicleAddAll();
     //testChronicleSetLong();
     //testChronicleSetString();;
-    //testChronicleKeyType();
+    testChronicleKeyType();
     //testChronicleIterate();
     //testRecordChronicle();
-    testMemoryOffHeapChronicle();
+    //testMemoryOffHeapChronicle();
   }
 
   public static void main(String[] args){

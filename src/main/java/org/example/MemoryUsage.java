@@ -39,8 +39,8 @@ public class MemoryUsage {
       _numVarKeys[i] = (int) (GB_TO_BYTES * _gb[i]) / _avgKeyLen;
     }
     RandomUtils random = new RandomUtils();
-    stringSetKeys = new HashSet<>(_numVarKeys[ROUNDS-1]);
-    random.buildStringSetRandomRangeExact(stringSetKeys,_numVarKeys[ROUNDS-1],_avgKeyLen); // only 1GB worth of keys
+    //stringSetKeys = new HashSet<>(_numVarKeys[ROUNDS-1]);
+    //random.buildStringSetRandomRangeExact(stringSetKeys,_numVarKeys[ROUNDS-1],_avgKeyLen); // only 1GB worth of keys
     set = new Set[ROUNDS];
   }
 
@@ -52,12 +52,16 @@ public class MemoryUsage {
     return (Long.valueOf(init).doubleValue() / (1024 * 1024)) + " MB";
   }
 
-  public void printMemoryChronicle(ChronicleSet set){
+  public void printMemoryChronicle(ChronicleSet set) throws InterruptedException {
+    System.gc();
+    Thread.sleep(30000);
     System.out.println("Heap Memory: " + toMB(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())); //heap memory
     System.out.println("OffHeap Memory for Chronicle Set " + toMB(set.offHeapMemoryUsed())); //offHeapMemory
   }
 
-  public void printMemoryMapDB(){
+  public void printMemoryMapDB() throws InterruptedException {
+    System.gc();
+    Thread.sleep(30000);
     System.out.println("Heap Memory: " + toMB(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())); //heap memory
     System.out.println("OffHeap Memory for Map DB "); //offHeapMemory
 
@@ -71,50 +75,60 @@ public class MemoryUsage {
     }
   }
 
- public void checkMemoryUsageMapDBInt(){
+ public void checkMemoryUsageMapDBInt() throws InterruptedException {
    DB db = DBMaker.memoryDirectDB().make();
-    for(int i=0;i<ROUNDS;i++) {
+    for(int i=4;i<ROUNDS;i++) {
       System.out.println("Heap Memory: " + toMB(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())); //heap memory
 
       String s = "int" + i;
 
       System.out.println("*****************Iteration " + i + " Keys " +_numIntKeys[i] + " GB " + _gb[i] + "*************************");
-      set[i]= db.hashSet(s).serializer(Serializer.INTEGER).createOrOpen();
       printMemoryMapDB();
+
+      set[i]= db.hashSet(s).serializer(Serializer.INTEGER).createOrOpen();
+
       int value;
       for (value = 0; value < _numIntKeys[i]; ++value)
         set[i].add(value);
       System.out.println("---- After Loading: -----");
-      System.out.println("Size of set: " + set[i].size());
+      //System.out.println("Size of set: " + set[i].size());
+
       printMemoryMapDB();
     }
   }
 
-  public void checkMemoryUsageMapDBString(){
+  public void checkMemoryUsageMapDBString() throws InterruptedException {
     DB db = DBMaker.memoryDirectDB().make();
     RandomUtils random = new RandomUtils();
+    printMemoryMapDB();
     for(int i=0;i<ROUNDS;i++) {
       //System.out.println("Heap Memory: " + toMB(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())); //heap memory
 
       String s = "s" + i;
       System.out.println("**************************Iteration " + i + " Keys " +_numVarKeys[i] + " GB " + _gb[i] + "*******************************");
-      set[i]= db.hashSet(s).serializer(Serializer.STRING).createOrOpen();
       printMemoryMapDB();
+
+      set[i]= db.hashSet(s).serializer(Serializer.STRING).createOrOpen();
+      //printMemoryMapDB();
 
       //random.buildStringSetRandomRangeExact(set,_numVarKeys[i],_avgKeyLen*2);
       random.CopyFromSet(stringSetKeys,set[i],_numVarKeys[i]);
+
       System.out.println("---- After Loading: -----");
-      System.out.println("Size of set: "+set[i].size());
       printMemoryMapDB();
+      //System.out.println("Size of set: "+set[i].size());
     }
   }
 
-  public void checkMemoryUsageChronicleInt(){
+  public void checkMemoryUsageChronicleInt() throws InterruptedException {
     for(int i=0;i<ROUNDS;i++) {
+      System.gc();
+      Thread.sleep(30000);
+      System.out.println("Initial Heap Memory:" +  toMB(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
+
       set[i] = ChronicleSetBuilder.of(Integer.class).entries(_numIntKeys[i]).create();
 
       System.out.println("*******************Iteration " + i + " Keys " +_numIntKeys[i] + " GB " + _gb[i] + "**********************");
-      printMemoryChronicle((ChronicleSet) set[i]);
 
       int value;
       for (value = 0; value < _numIntKeys[i]; ++value)
@@ -122,20 +136,27 @@ public class MemoryUsage {
 
       System.out.println("---- After Loading: -----");
       System.out.println("Size of set: " + set[i].size());
+
       printMemoryChronicle((ChronicleSet) set[i]);
     }
   }
 
-  public void checkMemoryUsageChronicleString(){
+  public void checkMemoryUsageChronicleString() throws InterruptedException {
     RandomUtils random = new RandomUtils();
+    System.out.println("Heap Memory: " + toMB(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())); //heap memory
+
+    String str = StringUtils.repeat("a", _avgKeyLen);
+
     for(int i=0;i<ROUNDS;i++) {
-      String str = StringUtils.repeat("a", _avgKeyLen);
+      System.gc();
+      Thread.sleep(30000);
+      System.out.println("Initial Heap Memory:" +  toMB(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
+
 
       set[i] = ChronicleSetBuilder.of(String.class).averageKey(str).entries(_numVarKeys[i]).create();
 
       System.out.println("*******************Iteration " + i + " Keys " +_numVarKeys[i] + " GB " + _gb[i] + "**********************");
-      printMemoryChronicle((ChronicleSet) set[i]);
-
+      //printMemoryChronicle((ChronicleSet) set[i]);
       System.out.println("---- After Loading: -----");
       random.CopyFromSet(stringSetKeys,set[i],_numVarKeys[i]);
       System.out.println("Size of set: "+set[i].size());
@@ -150,7 +171,7 @@ public class MemoryUsage {
       set[i].size();
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) throws InterruptedException {
     System.out.println("Initial Heap Memory: " + toMB(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())); //heap memory
     MemoryUsage m = new MemoryUsage();
     m.init();
